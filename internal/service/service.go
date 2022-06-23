@@ -11,7 +11,6 @@ type Orders interface {
 type Service struct {
 	Users   Users
 	Orders  Orders
-	storage *storage.Storage
 }
 
 func NewService(store *storage.Storage) *Service {
