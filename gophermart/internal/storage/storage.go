@@ -14,5 +14,8 @@ type Storage struct {
 }
 
 func NewStorage(db *sqlx.DB) *Storage {
-	return &Storage{}
+	return &Storage{
+		Users:  NewUsersStorage(db),
+		Orders: NewOrdersStorage(db),
+	}
 }
