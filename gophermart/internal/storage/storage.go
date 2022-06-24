@@ -11,9 +11,8 @@ type Orders interface {
 type Storage struct {
 	Users  Users
 	Orders Orders
-	db     *sqlx.DB
 }
 
-func NewStorage() *Storage {
+func NewStorage(db *sqlx.DB) *Storage {
 	return &Storage{}
 }
