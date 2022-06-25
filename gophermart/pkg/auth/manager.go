@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"github.com/AXlIS/gofermart/internal/config"
 	"github.com/dgrijalva/jwt-go"
 	"time"
 )
@@ -14,20 +15,22 @@ type Tokens struct {
 
 type TokenManager interface {
 	NewToken(userID string, tokenTTL time.Duration) (string, error)
-	NewTokenPair(userID string, accessTokenTTL, refreshTokenTTL time.Duration) (*Tokens, error)
+	NewTokenPair(userID string) (*Tokens, error)
 	Parse(token string) (string, error)
 }
 
 type Manager struct {
-	signingKey string
+	JWT config.JWTConfig
 }
 
-func NewManager(signingKey string) (*Manager, error) {
-	if signingKey == "" {
+func NewManager(JWT config.JWTConfig) (*Manager, error) {
+	if JWT.SigningKey== "" {
 		return nil, errors.New("empty singing key")
 	}
 
-	return &Manager{signingKey: signingKey}, nil
+	return &Manager{
+		JWT: JWT,
+	}, nil
 }
 
 func (m *Manager) NewToken(userID string, tokenTTL time.Duration) (string, error) {
@@ -36,16 +39,16 @@ func (m *Manager) NewToken(userID string, tokenTTL time.Duration) (string, error
 		Subject:   userID,
 	})
 
-	return token.SignedString([]byte(m.signingKey))
+	return token.SignedString([]byte(m.JWT.SigningKey))
 }
 
-func (m *Manager) NewTokenPair(userID string, accessTokenTTL, refreshTokenTTL time.Duration) (*Tokens, error) {
-	accessToken, err := m.NewToken(userID, accessTokenTTL)
+func (m *Manager) NewTokenPair(userID string) (*Tokens, error) {
+	accessToken, err := m.NewToken(userID, m.JWT.AccessTokenTTL)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := m.NewToken(userID, refreshTokenTTL)
+	refreshToken, err := m.NewToken(userID, m.JWT.RefreshTokenTTL)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +62,7 @@ func (m *Manager) Parse(parseToken string) (string, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
 
-		return []byte(m.signingKey), nil
+		return []byte(m.JWT.SigningKey), nil
 	})
 
 	if err != nil {

@@ -1,6 +1,9 @@
 package service
 
-import "github.com/AXlIS/gofermart/internal/storage"
+import (
+	"github.com/AXlIS/gofermart/internal/storage"
+	"github.com/AXlIS/gofermart/pkg/auth"
+)
 
 type Users interface {
 }
@@ -13,9 +16,9 @@ type Service struct {
 	Orders  Orders
 }
 
-func NewService(store *storage.Storage) *Service {
+func NewService(store *storage.Storage, manager auth.TokenManager) *Service {
 	return &Service{
-		Users:   NewUsersService(store.Users),
+		Users:   NewUsersService(store.Users, manager),
 		Orders:  NewOrdersService(store.Orders),
 	}
 }
