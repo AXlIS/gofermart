@@ -8,6 +8,7 @@ import (
 	s "github.com/AXlIS/gofermart/internal/service"
 	store "github.com/AXlIS/gofermart/internal/storage"
 	"github.com/AXlIS/gofermart/pkg/auth"
+	"github.com/AXlIS/gofermart/pkg/hash"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -25,13 +26,16 @@ func main() {
 	if err != nil {
 		log.Fatal().Msgf("postgres error: %s", err.Error())
 	}
+
 	tokenManager, err := auth.NewManager(cfg.Auth.JWT)
 	if err != nil {
 		log.Fatal().Msgf("token manager error: %s", err.Error())
 	}
 
+	hasher := hash.NewSHA256Hasher(cfg.Auth.PasswordSalt)
+
 	storage := store.NewStorage(db)
-	service := s.NewService(storage, tokenManager)
+	service := s.NewService(storage, tokenManager, hasher)
 	router := handler.NewHandler(service, tokenManager, cfg.Auth.JWT.AccessTokenTTL)
 
 	serve := new(server.Server)

@@ -1,8 +1,13 @@
 package storage
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/AXlIS/gofermart/internal/domain"
+	"github.com/jmoiron/sqlx"
+)
 
 type Users interface {
+	Create(username, passwordHash string) error
+	Get(username string) (domain.User, error)
 }
 
 type Orders interface {

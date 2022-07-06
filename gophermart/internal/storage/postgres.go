@@ -5,6 +5,11 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
+)
+
+const (
+	usersTable = "content.users"
 )
 
 func NewPostgresDB(uri string) (*sqlx.DB, error) {
@@ -22,7 +27,7 @@ func NewPostgresDB(uri string) (*sqlx.DB, error) {
 		return nil, err
 	}
 	if err := migration.Up(); err != nil {
-		return nil, err
+		log.Info().Msgf("migrations: %s", err.Error())
 	}
 
 	return db, nil
