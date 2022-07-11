@@ -28,7 +28,7 @@ func (u *UsersStorage) Create(username, passwordHash string) error {
 
 func (u *UsersStorage) Get(username string) (domain.User, error) {
 	var user domain.User
-	query := fmt.Sprintf("SELECT password FROM %s WHERE username=$1", usersTable)
+	query := fmt.Sprintf("SELECT id, password FROM %s WHERE username=$1", usersTable)
 	err := u.db.Get(&user, query, username)
 	return user, err
 }

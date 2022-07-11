@@ -9,6 +9,7 @@ import (
 type Users interface {
 	Register(username, password string) error
 	Login(username, password string) (*auth.Tokens, error)
+	GetNewAccess(id string) (string, error)
 }
 
 type Orders interface {

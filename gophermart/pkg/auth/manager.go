@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AXlIS/gofermart/internal/config"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -15,6 +16,7 @@ type Tokens struct {
 
 type TokenManager interface {
 	NewToken(userID string, tokenTTL time.Duration) (string, error)
+	NewAccessToken(userID string) (string, error)
 	NewTokenPair(userID string) (*Tokens, error)
 	Parse(token string) (string, error)
 }
@@ -23,8 +25,39 @@ type Manager struct {
 	JWT config.JWTConfig
 }
 
+type Payload struct {
+	ID        uuid.UUID `json:"id"`
+	UserID    string    `json:"user_id"`
+	IssuedAt  time.Time `json:"issued_at"`
+	ExpiredAt time.Time `json:"expired_at"`
+}
+
+var ErrExpiredToken = errors.New("token has expired")
+
+func (p *Payload) Valid() error {
+	if time.Now().After(p.ExpiredAt) {
+		return ErrExpiredToken
+	}
+	return nil
+}
+
+func NewPayload(userID string, duration time.Duration) (*Payload, error) {
+	tokenID, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+
+	payload := &Payload{
+		ID:        tokenID,
+		UserID:    userID,
+		IssuedAt:  time.Now(),
+		ExpiredAt: time.Now().Add(duration),
+	}
+	return payload, nil
+}
+
 func NewManager(JWT config.JWTConfig) (*Manager, error) {
-	if JWT.SigningKey== "" {
+	if JWT.SigningKey == "" {
 		return nil, errors.New("empty singing key")
 	}
 
@@ -34,12 +67,20 @@ func NewManager(JWT config.JWTConfig) (*Manager, error) {
 }
 
 func (m *Manager) NewToken(userID string, tokenTTL time.Duration) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(tokenTTL).Unix(),
-		Subject:   userID,
-	})
+
+	payload, err := NewPayload(userID, tokenTTL)
+	if err != nil {
+		fmt.Println("4")
+		return "", err
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 
 	return token.SignedString([]byte(m.JWT.SigningKey))
+}
+
+func (m *Manager) NewAccessToken(userID string) (string, error) {
+	return m.NewToken(userID, m.JWT.AccessTokenTTL)
 }
 
 func (m *Manager) NewTokenPair(userID string) (*Tokens, error) {
@@ -57,22 +98,21 @@ func (m *Manager) NewTokenPair(userID string) (*Tokens, error) {
 }
 
 func (m *Manager) Parse(parseToken string) (string, error) {
-	token, err := jwt.Parse(parseToken, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+	token, err := jwt.ParseWithClaims(parseToken, &Payload{}, func(token *jwt.Token) (i interface{}, err error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
 		return []byte(m.JWT.SigningKey), nil
 	})
-
 	if err != nil {
 		return "", err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
+	payload, ok := token.Claims.(*Payload)
 	if !ok {
-		return "", fmt.Errorf("error get user claims from token")
+		return "", errors.New("error get user claims from token")
 	}
 
-	return claims["sub"].(string), nil
+	return payload.UserID, nil
 }

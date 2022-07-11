@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/AXlIS/gofermart/internal/service"
 	"github.com/AXlIS/gofermart/pkg/auth"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,10 @@ type (
 		Username string `json:"username" binding:"required,min=2,max=64"`
 		Password string `json:"password" binding:"required,min=6,max=64"`
 	}
+
+	newAccessInput struct {
+		RefreshToken string `json:"refresh_token"`
+	}
 )
 
 func NewHandler(service *service.Service, tokenManager auth.TokenManager, accessTokenTTL time.Duration) *Handler {
@@ -36,7 +41,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		api.POST("/register", h.Register)
 		api.POST("/login", h.Login)
-		api.GET("/refresh", h.GetNewRefresh)
+		api.GET("/refresh", h.CheckTokenHandler(), h.GetNewAccess)
 	}
 
 	return router
@@ -77,6 +82,17 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, tokens)
 }
 
-func (h *Handler) GetNewRefresh(c *gin.Context) {
+func (h *Handler) GetNewAccess(c *gin.Context) {
 
+	id := c.GetString("id")
+
+	accessToken, err := h.service.Users.GetNewAccess(id)
+	if err != nil {
+		fmt.Println("2")
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Header("content-type", "application/json")
+	c.JSON(http.StatusOK, map[string]string{"access_token": accessToken})
 }

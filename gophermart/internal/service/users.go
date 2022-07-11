@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/AXlIS/gofermart/internal/storage"
 	"github.com/AXlIS/gofermart/pkg/auth"
 	"github.com/AXlIS/gofermart/pkg/hash"
@@ -28,7 +29,7 @@ func (u *UsersService) Register(username, password string) error {
 }
 
 func (u *UsersService) Login(username, password string) (*auth.Tokens, error) {
-	passwordHash:= u.hasher.Hash(password)
+	passwordHash := u.hasher.Hash(password)
 
 	user, err := u.store.Get(username)
 	if err != nil {
@@ -39,10 +40,22 @@ func (u *UsersService) Login(username, password string) (*auth.Tokens, error) {
 		return nil, errors.New("incorrect password")
 	}
 
+	fmt.Println(user.Id)
+
 	tokens, err := u.tokenManager.NewTokenPair(user.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	return tokens, nil
+}
+
+func (u *UsersService) GetNewAccess(id string) (string, error) {
+	accessToken, err := u.tokenManager.NewAccessToken(id)
+	if err != nil {
+		fmt.Println("33")
+		return "", err
+	}
+
+	return accessToken, nil
 }
