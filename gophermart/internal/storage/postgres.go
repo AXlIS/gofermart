@@ -10,6 +10,8 @@ import (
 
 const (
 	usersTable = "content.users"
+	ordersTable = "content.orders"
+	withdrawalTable = "content.withdrawals"
 )
 
 func NewPostgresDB(uri string) (*sqlx.DB, error) {

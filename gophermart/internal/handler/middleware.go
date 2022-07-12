@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -16,7 +15,6 @@ func (h *Handler) CheckTokenHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		id, err := h.parseAuthorization(c)
-		fmt.Println(id, err)
 
 		if err != nil {
 			errorResponse(c, http.StatusUnauthorized, err.Error())

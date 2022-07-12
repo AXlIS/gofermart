@@ -1,2 +1,2 @@
 DROP SCHEMA content;
-DROP TABLE users;
+DROP TABLE content.users;

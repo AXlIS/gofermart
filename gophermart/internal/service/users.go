@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	g "github.com/AXlIS/gofermart"
 	"github.com/AXlIS/gofermart/internal/storage"
 	"github.com/AXlIS/gofermart/pkg/auth"
 	"github.com/AXlIS/gofermart/pkg/hash"
@@ -53,9 +54,28 @@ func (u *UsersService) Login(username, password string) (*auth.Tokens, error) {
 func (u *UsersService) GetNewAccess(id string) (string, error) {
 	accessToken, err := u.tokenManager.NewAccessToken(id)
 	if err != nil {
-		fmt.Println("33")
 		return "", err
 	}
 
 	return accessToken, nil
+}
+
+func (u *UsersService) GetBalance(userID string) (g.Balance, error) {
+	balance, err := u.store.GetBalance(userID)
+	if err != nil {
+		return g.Balance{}, err
+	}
+	return balance, nil
+}
+
+func (u *UsersService) Debit(userID string, sum, order float32) error {
+	return u.store.Debit(userID, sum, order)
+}
+
+func (u *UsersService) GetWithdrawalsInfo(userID string) ([]g.Withdrawal, error) {
+	withdrawal, err := u.store.GetWithdrawalsInfo(userID)
+	if err != nil {
+		return nil, err
+	}
+	return withdrawal, nil
 }

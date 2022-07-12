@@ -70,7 +70,6 @@ func (m *Manager) NewToken(userID string, tokenTTL time.Duration) (string, error
 
 	payload, err := NewPayload(userID, tokenTTL)
 	if err != nil {
-		fmt.Println("4")
 		return "", err
 	}
 

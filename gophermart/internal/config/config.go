@@ -16,8 +16,9 @@ const (
 )
 
 var (
-	addr string
-	uri  string
+	addr    string
+	uri     string
+	accrual string
 )
 
 type (
@@ -43,14 +44,17 @@ type (
 	}
 
 	HTTPConfig struct {
-		Port string
-		Host string
+		Port        string
+		Host        string
+		AccrualPort string
+		AccrualHost string
 	}
 )
 
 func init() {
 	flag.StringVar(&addr, "a", "", "address to listen")
 	flag.StringVar(&uri, "d", "", "database uri")
+	flag.StringVar(&accrual, "r", "", "accrual system address")
 	flag.Parse()
 }
 
@@ -70,9 +74,13 @@ func Init() (*Config, error) {
 	}
 
 	address := strings.Split(GetEnv("RUN_ADDRESS", addr), ":")
+	accrualAddress := strings.Split(GetEnv("ACCRUAL_SYSTEM_ADDRESS", accrual), ":")
+
 	http := HTTPConfig{
 		Host: address[0],
 		Port: address[1],
+		AccrualHost: accrualAddress[0],
+		AccrualPort: accrualAddress[1],
 	}
 
 	cfg := Config{

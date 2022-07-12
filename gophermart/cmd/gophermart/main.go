@@ -38,6 +38,14 @@ func main() {
 	service := s.NewService(storage, tokenManager, hasher)
 	router := handler.NewHandler(service, tokenManager, cfg.Auth.JWT.AccessTokenTTL)
 
+	go func() {
+		accrualServer := new(server.Server)
+		accrualRouter := handler.NewAccrualHandler()
+		if err := accrualServer.Start(fmt.Sprintf(":%s", cfg.HTTP.AccrualPort), accrualRouter.InitRoutes()); err != nil {
+			log.Fatal().Msgf("server error: %s", err.Error())
+		}
+	}()
+
 	serve := new(server.Server)
 	if err := serve.Start(fmt.Sprintf(":%s", cfg.HTTP.Port), router.InitRoutes()); err != nil {
 		log.Fatal().Msgf("server error: %s", err.Error())
