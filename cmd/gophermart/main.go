@@ -24,7 +24,7 @@ func main() {
 
 	db, err := store.NewPostgresDB(cfg.DB.DSN)
 	if err != nil {
-		log.Fatal().Msgf("postgres error: %s", err.Error())
+		log.Error().Msgf("postgres error: %s", err.Error())
 	}
 
 	tokenManager, err := auth.NewManager(cfg.Auth.JWT)
