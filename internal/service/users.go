@@ -40,7 +40,7 @@ func (u *UsersService) Login(username, password string) (*auth.Tokens, error) {
 		return nil, errors.New("incorrect password")
 	}
 
-	tokens, err := u.tokenManager.NewTokenPair(user.Id)
+	tokens, err := u.tokenManager.NewTokenPair(user.ID)
 	if err != nil {
 		return nil, err
 	}

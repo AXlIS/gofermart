@@ -52,9 +52,9 @@ type (
 )
 
 func init() {
-	flag.StringVar(&addr, "a", "", "address to listen")
-	flag.StringVar(&uri, "d", "", "database uri")
-	flag.StringVar(&accrual, "r", "", "accrual system address")
+	flag.StringVar(&addr, "a", "localhost:8080", "address to listen")
+	flag.StringVar(&uri, "d", "postgres://postgres:password@db:5438/postgres?sslmode=disable", "database uri")
+	flag.StringVar(&accrual, "r", "localhost:8081", "accrual system address")
 	flag.Parse()
 }
 

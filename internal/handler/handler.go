@@ -123,6 +123,10 @@ func (h *Handler) LoadOrder(c *gin.Context) {
 	}
 
 	orderNumber, err := strconv.Atoi(string(dataBytes))
+	if err != nil {
+		errorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	if err := h.service.Orders.Load(id, orderNumber); err != nil {
 		errorResponse(c, http.StatusInternalServerError, err.Error())
