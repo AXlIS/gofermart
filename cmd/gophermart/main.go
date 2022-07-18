@@ -19,7 +19,7 @@ func main() {
 
 	cfg, err := config.Init()
 	if err != nil {
-		log.Fatal().Msgf("config error: %s", err.Error())
+		log.Error().Msgf("config error: %s", err.Error())
 	}
 
 	db, err := store.NewPostgresDB(cfg.DB.DSN)
@@ -29,7 +29,7 @@ func main() {
 
 	tokenManager, err := auth.NewManager(cfg.Auth.JWT)
 	if err != nil {
-		log.Fatal().Msgf("token manager error: %s", err.Error())
+		log.Error().Msgf("token manager error: %s", err.Error())
 	}
 
 	hasher := hash.NewSHA256Hasher(cfg.Auth.PasswordSalt)
