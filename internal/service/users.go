@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	g "github.com/AXlIS/gofermart"
 	"github.com/AXlIS/gofermart/internal/storage"
 	"github.com/AXlIS/gofermart/pkg/auth"
@@ -40,8 +39,6 @@ func (u *UsersService) Login(username, password string) (*auth.Tokens, error) {
 	if passwordHash != user.Password {
 		return nil, errors.New("incorrect password")
 	}
-
-	fmt.Println(user.Id)
 
 	tokens, err := u.tokenManager.NewTokenPair(user.Id)
 	if err != nil {

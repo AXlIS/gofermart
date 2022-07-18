@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/AXlIS/gofermart/internal/service"
 	"github.com/AXlIS/gofermart/pkg/auth"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
@@ -38,6 +39,9 @@ func NewHandler(service *service.Service, tokenManager auth.TokenManager, access
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.Use(h.DecompressBody())
+	router.Use(gzip.Gzip(gzip.BestCompression))
 
 	api := router.Group("/api/user")
 	{

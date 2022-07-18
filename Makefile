@@ -1,6 +1,6 @@
 .PHONY: build
 
 run:
-	go run ./cmd/gophermart/main.go
+	docker-compose up --build
 
 .DEFAULT_GOAL := run
